@@ -1,0 +1,16 @@
+{
+    "rest-client.environmentVariables": {
+        "local": {
+            "apiUrl": "http://localhost/api",
+            "token": ""
+        },
+        "dev": {
+            "apiUrl": "",
+            "token": ""
+        },
+        "prod": {
+            "apiUrl": "",
+            "token": ""
+        }
+    }
+}

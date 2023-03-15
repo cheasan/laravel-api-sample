@@ -1,0 +1,33 @@
+######### Register #########
+POST {{apiUrl}}/auth/register HTTP/1.1
+content-type: application/json
+
+{
+    "first_name": "tiv",
+	"last_name": "mary",
+	"phone_number": "+855162126999",
+	"email": "bunmary@gmail.com",
+	"password": "password",
+	"password_confirmation": "password"
+}
+
+
+######### Login #########
+POST {{apiUrl}}/auth/login HTTP/1.1
+content-type: application/json
+
+{
+    "email": "cheasan@gmail.com",
+	"password": "password"
+}
+
+
+######### Logout #########
+POST {{apiUrl}}/auth/logout HTTP/1.1
+content-type: application/json
+authorization: {{token}}
+
+{
+    "email": "cheasan@gmail.com",
+	"password": "password"
+}
