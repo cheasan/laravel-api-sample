@@ -2,7 +2,11 @@
 
 namespace App\Exceptions;
 
+use App\Http\Responses\ErrorResponse;
+use App\Http\Responses\FailResponse;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -44,5 +48,31 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        $this->renderable(function (NotFoundHttpException $e, $request) {
+            if ($request->expectsJson()) {
+                return new ErrorResponse([
+                    'message' => 'Resource not found'
+                ], 'KO', 404);
+            }
+        });
+    }
+
+    /**
+     * Handle 500 error
+     */
+
+    public function render($request, Throwable $exception)
+    {
+        if ($exception instanceof HttpException && $exception->getStatusCode() == 500) {
+
+            // todo: log request
+
+            return new FailResponse([
+                'message' => $exception->getMessage()
+            ]);
+        }
+
+        return parent::render($request, $exception);
     }
 }

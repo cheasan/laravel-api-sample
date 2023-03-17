@@ -11,34 +11,38 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Customer;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+
     public function login(LoginUserRequest $request)
     {
-        try {
-            $validated = $request->validated();
 
-            $user = User::where('email', $request->email)->first();
+        $validated = $request->validated();
+        $user = User::where('email', $request->email)->first();
 
-            if (!Auth::attempt($request->only(['email', 'password']))) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Email & Password does not match with our record.',
-                ], 401);
-            }
-
-            return response()->json([
-                'status' => true,
-                'message' => 'User Logged In Successfully',
-                'token' => $user->createToken("API TOKEN")->plainTextToken
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage()
-            ], 500);
+        if (!$user) {
+            return new ErrorResponse(
+                null,
+                ['message' => 'Email or password might be incorrect. Try again.'],
+                401
+            );
         }
+
+        if (!Hash::check($validated['password'], $user->password)) {
+            return new ErrorResponse(
+                null,
+                ['message' => 'Email or password might be incorrect. Try again.'],
+                401
+            );
+        }
+
+        return new SuccessResponse(
+            ['token' => $user->createToken("API TOKEN")->plainTextToken],
+            'User Created Successfully',
+            200
+        );
     }
 
     public function createUser(CreateUserRequest $request)
@@ -61,8 +65,6 @@ class AuthController extends Controller
                 'phone_number' => $validated['phone_number'],
             ]);
 
-            $token = $user->createToken("API TOKEN")->plainTextToken;
-
             DB::commit();
         } catch (\Exception $e) {
 
@@ -72,7 +74,7 @@ class AuthController extends Controller
         }
 
         return new SuccessResponse(
-            ['token' => $token],
+            ['token' => $user->createToken("API TOKEN")->plainTextToken],
             'User Created Successfully',
             201
         );

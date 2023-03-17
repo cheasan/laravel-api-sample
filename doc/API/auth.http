@@ -1,6 +1,7 @@
 ######### Register #########
 POST {{apiUrl}}/auth/register HTTP/1.1
-content-type: application/json
+Content-Type: application/json
+Accept: application/json
 
 {
     "first_name": "tiv",
@@ -14,7 +15,8 @@ content-type: application/json
 
 ######### Login #########
 POST {{apiUrl}}/auth/login HTTP/1.1
-content-type: application/json
+Content-Type: application/json
+Accept: application/json
 
 {
     "email": "cheasan@gmail.com",
@@ -24,10 +26,6 @@ content-type: application/json
 
 ######### Logout #########
 POST {{apiUrl}}/auth/logout HTTP/1.1
-content-type: application/json
+Content-Type: application/json
+Accept: application/json
 authorization: {{token}}
-
-{
-    "email": "cheasan@gmail.com",
-	"password": "password"
-}
