@@ -7,11 +7,14 @@ use App\Http\Requests\Auth\CreateUserRequest;
 use App\Http\Requests\Auth\LoginUserRequest;
 use App\Http\Responses\ErrorResponse;
 use App\Http\Responses\SuccessResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
 use App\Models\Customer;
+use App\Models\User;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Http\Request as HttpRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\URL;
 
 class AuthController extends Controller
 {
@@ -35,6 +38,15 @@ class AuthController extends Controller
                 null,
                 ['message' => 'Email or password might be incorrect. Try again.'],
                 401
+            );
+        }
+
+        // Check if the user has already verified their email
+        if (!$user->hasVerifiedEmail()) {
+            return new ErrorResponse(
+                null,
+                ['message' => 'Please verify your email before login.'],
+                400
             );
         }
 
@@ -65,6 +77,9 @@ class AuthController extends Controller
                 'phone_number' => $validated['phone_number'],
             ]);
 
+            // Send the email verification notification
+            $user->notify(new VerifyEmail);
+
             DB::commit();
         } catch (\Exception $e) {
 
@@ -88,5 +103,28 @@ class AuthController extends Controller
             null,
             'User logout successfully.'
         );
+    }
+
+    public function verify(HttpRequest $request)
+    {
+        // Find the user by id
+        $user = User::findOrFail($request->route('id'));
+
+        // Check if the url is a valid signed url
+        if (!URL::hasValidSignature($request)) {
+            return response()->json(['error' => 'Invalid verification link.']);
+        }
+
+        // Check if the user has already verified their email
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified.']);
+        }
+
+        // Mark the user as verified and fire the event
+        $user->markEmailAsVerified();
+        event(new Verified($user));
+
+        // Return a success response
+        return response()->json(['message' => 'Email verified successfully.']);
     }
 }

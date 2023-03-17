@@ -4,10 +4,10 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "first_name": "tiv",
-	"last_name": "mary",
-	"phone_number": "+855162126999",
-	"email": "bunmary@gmail.com",
+    "first_name": "San",
+	"last_name": "Chea",
+	"phone_number": "+8551621269909",
+	"email": "cheasan99@gmail.com",
 	"password": "password",
 	"password_confirmation": "password"
 }
@@ -19,7 +19,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "email": "cheasan@gmail.com",
+    "email": "somboon@gmail.com",
 	"password": "password"
 }
 
