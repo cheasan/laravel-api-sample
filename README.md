@@ -31,11 +31,19 @@ Laravel is accessible, powerful, and provides tools required for large, robust a
 
 3. Clone the project. Make sure to place it in ~/ directory to ensure fast access. Then cd to your project directory.
 
+4. Copy .env.example to .env
+
 4. Run the following command `docker run --rm -v $(pwd):/app composer install`
 
 5. Add Laravel Sail command to ~/.bashrc. `alias sail='[ -f sail ] && sh sail || sh vendor/bin/sail'`
 
 6. Run command `sail up -d`. When done, access the project at http://localhost
+
+## Migrate your database
+
+1. In WSL2 command, project directory, run `sail artisan migrate:install` to generate `migrations` table
+
+2. Run `sail artisan migrate`.
 
 
 ## License
