@@ -7,8 +7,8 @@ use App\Http\Requests\Auth\CreateUserRequest;
 use App\Http\Requests\Auth\LoginUserRequest;
 use App\Http\Responses\ErrorResponse;
 use App\Http\Responses\SuccessResponse;
-use App\Models\Customer;
-use App\Models\User;
+use App\Repositories\CustomerRepository;
+use App\Repositories\UserRepository;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Http\Request as HttpRequest;
@@ -19,40 +19,40 @@ use Illuminate\Support\Facades\URL;
 class AuthController extends Controller
 {
 
+    protected $userRepository;
+    protected $customerRepository;
+
+    public function __construct(UserRepository $userRepository, CustomerRepository $customerRepository)
+    {
+        $this->userRepository = $userRepository;
+        $this->customerRepository = $customerRepository;
+    }
+
     public function login(LoginUserRequest $request)
     {
 
         $validated = $request->validated();
-        $user = User::where('email', $request->email)->first();
+        $user = $this->userRepository->find('email', $request->email);
 
         if (!$user) {
             return new ErrorResponse(
-                null,
                 ['message' => 'Email or password might be incorrect. Try again.'],
                 401
             );
         }
 
         if (!Hash::check($validated['password'], $user->password)) {
-            return new ErrorResponse(
-                null,
-                ['message' => 'Email or password might be incorrect. Try again.'],
-                401
-            );
+            return new ErrorResponse(['message' => 'Email or password might be incorrect. Try again.'], 401);
         }
 
         // Check if the user has already verified their email
         if (!$user->hasVerifiedEmail()) {
-            return new ErrorResponse(
-                null,
-                ['message' => 'Please verify your email before login.'],
-                400
-            );
+            return new ErrorResponse(['message' => 'Please verify your email before login.']);
         }
 
         return new SuccessResponse(
             ['token' => $user->createToken("API TOKEN")->plainTextToken],
-            'User Created Successfully',
+            'User login successfully',
             200
         );
     }
@@ -65,12 +65,12 @@ class AuthController extends Controller
 
         try {
 
-            $user = User::create([
+            $user = $this->userRepository->create([
                 'email' => $validated['email'],
                 'password' => bcrypt($validated['password'])
             ]);
 
-            Customer::create([
+            $this->customerRepository->create([
                 'user_id' => $user->id,
                 'first_name' => $validated['first_name'],
                 'last_name' => $validated['last_name'],
@@ -84,7 +84,6 @@ class AuthController extends Controller
         } catch (\Exception $e) {
 
             DB::rollBack();
-
             return new ErrorResponse(['message' => $e->getMessage()]);
         }
 
@@ -107,24 +106,22 @@ class AuthController extends Controller
 
     public function verify(HttpRequest $request)
     {
-        // Find the user by id
-        $user = User::findOrFail($request->route('id'));
+        $user = $this->userRepository->findByIdOrFail($request->route('id'));
 
-        // Check if the url is a valid signed url
         if (!URL::hasValidSignature($request)) {
-            return response()->json(['error' => 'Invalid verification link.']);
+            return new ErrorResponse(['message' => 'Invalid verification link.']);
         }
 
-        // Check if the user has already verified their email
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified.']);
+            return new ErrorResponse(['message' => 'Email already verified.']);
         }
 
-        // Mark the user as verified and fire the event
         $user->markEmailAsVerified();
         event(new Verified($user));
 
-        // Return a success response
-        return response()->json(['message' => 'Email verified successfully.']);
+        return new SuccessResponse(
+            null,
+            'Email verified successfully.'
+        );
     }
 }

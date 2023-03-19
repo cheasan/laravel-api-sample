@@ -11,10 +11,10 @@ class ErrorResponse implements Responsable
     protected $message;
     protected $status;
 
-    public function __construct($errors = null, $message = 'KO', $status = 400)
+    public function __construct($errors = null, $status = 400)
     {
         $this->errors = $errors;
-        $this->message = $message;
+        $this->message = 'Expected faulty. Please check the error message below.';
         $this->status = $status;
     }
 
