@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ResetPassword\ForgotPasswordRequest;
-use App\Http\Requests\ResetPassword\ResetPasswordRequest;
-use App\Http\Requests\ResetPassword\VerifyPinRequest;
+use App\Http\Requests\ForgotPassword\ForgotPasswordRequest;
+use App\Http\Requests\ForgotPassword\ResetPasswordRequest;
+use App\Http\Requests\ForgotPassword\VerifyPinRequest;
 use App\Http\Responses\ErrorResponse;
 use App\Http\Responses\SuccessResponse;
-use App\Mail\ResetPassword;
+use App\Mail\ForgotPassword;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -17,15 +17,18 @@ use Illuminate\Support\Facades\Mail;
 class ForgotPasswordController extends Controller
 {
 
-    protected $resetTokenTable = 'password_reset_tokens';
-    protected $userRepository;
+    protected string $resetTokenTable = 'password_reset_tokens';
+    protected UserRepository $userRepository;
 
     public function __construct(UserRepository $userRepository)
     {
         $this->userRepository = $userRepository;
     }
 
-    public function forgotPassword(ForgotPasswordRequest $request)
+    /**
+     * @throws \Exception
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): ErrorResponse|SuccessResponse
     {
 
         $validated = $request->validated();
@@ -52,14 +55,14 @@ class ForgotPasswordController extends Controller
         ]);
 
         if ($password_reset) {
-            Mail::to($request->all()['email'])->send(new ResetPassword($token));
+            Mail::to($request->all()['email'])->send(new ForgotPassword($token));
             return new SuccessResponse('Password reset Email has been sent to user.');
         }
 
         return new ErrorResponse(['message' => 'Password reset token could not generate successfully.']);
     }
 
-    public function verifyPin(VerifyPinRequest $request)
+    public function verifyPin(VerifyPinRequest $request): ErrorResponse|SuccessResponse
     {
 
         $validated = $request->validated();
@@ -68,7 +71,6 @@ class ForgotPasswordController extends Controller
             'email',
             $validated['email']
         );
-
 
         if (!$resetToken->exists()) {
             return new ErrorResponse(['message' => 'Provided token is not correct.'], 401);
@@ -90,7 +92,7 @@ class ForgotPasswordController extends Controller
         );
     }
 
-    public function resetPassword(ResetPasswordRequest $request)
+    public function resetPassword(ResetPasswordRequest $request): ErrorResponse|SuccessResponse
     {
         $validated = $request->validated();
 

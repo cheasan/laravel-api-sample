@@ -2,7 +2,7 @@
     "rest-client.environmentVariables": {
         "local": {
             "apiUrl": "http://localhost/api",
-            "token": "Bearer 8|eGqR1dj5SDVqaO9eTWGPwLyS9GWkenTvkXP2XX4B"
+            "token": "Bearer 4|mK9XQUgUCayh0oCeoeifRODaXwpBR3pS1SMrPO5L"
         },
         "dev": {
             "apiUrl": "",

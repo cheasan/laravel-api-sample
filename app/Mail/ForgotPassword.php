@@ -8,11 +8,11 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ResetPassword extends Mailable
+class ForgotPassword extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $pin;
+    public string $pin;
 
     /**
      * Create a new message instance.

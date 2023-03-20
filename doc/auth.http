@@ -4,10 +4,10 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "first_name": "Many",
-	"last_name": "Tiv",
-	"phone_number": "+85516212699",
-	"email": "many@gmail.com",
+    "first_name": "San",
+	"last_name": "Chea",
+	"phone_number": "+855162126",
+	"email": "san@gmail.com",
 	"password": "password",
 	"password_confirmation": "password"
 }
@@ -19,7 +19,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "email": "many@gmail.com",
+    "email": "san@gmail.com",
 	"password": "newpassword"
 }
 
@@ -29,3 +29,15 @@ POST {{apiUrl}}/auth/logout HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 authorization: {{token}}
+
+
+######### Logout #########
+POST {{apiUrl}}/auth/reset-logged-in-password HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+authorization: {{token}}
+
+{
+	"password": "password",
+	"new_password": "newpassword"
+}

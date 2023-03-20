@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\ResetPassword;
+namespace App\Http\Requests\ForgotPassword;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class VerifyPinRequest extends FormRequest
+class ForgotPasswordRequest extends FormRequest
 {
 
     /**
@@ -15,8 +15,7 @@ class VerifyPinRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
-            'token' => 'required|string',
+            'email' => 'required|email'
         ];
     }
 }
