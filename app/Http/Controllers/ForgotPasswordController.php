@@ -65,18 +65,17 @@ class ForgotPasswordController extends Controller
         $validated = $request->validated();
 
         $resetToken = DB::table($this->resetTokenTable)->where(
-            'email', $validated['email']
+            'email',
+            $validated['email']
         );
 
 
         if (!$resetToken->exists()) {
-            return new ErrorResponse(['message' => 'Password reset token could not generate successfully.'], 401);
+            return new ErrorResponse(['message' => 'Provided token is not correct.'], 401);
         }
 
-        $hash = Hash::check($validated['token'], $resetToken->first()->token);
-
         if (!Hash::check($validated['token'], $resetToken->first()->token)) {
-            return new ErrorResponse(['message' => 'Password reset token could not generate successfully.'], 401);
+            return new ErrorResponse(['message' => 'Provided token is not correct.'], 401);
         }
 
         $difference = Carbon::now()->diffInSeconds($resetToken->first()->created_at);
@@ -95,16 +94,16 @@ class ForgotPasswordController extends Controller
     {
         $validated = $request->validated();
 
-        $resetToken = DB::table($this->resetTokenTable)->where([
-            ['email', $validated['email']],
-            ['token', $validated['token']],
-        ]);
+        $resetToken = DB::table($this->resetTokenTable)->where(
+            'token',
+            $validated['token'],
+        );
 
-        if (!$resetToken) {
+        if (!$resetToken->first()) {
             return new ErrorResponse(['message' => 'Token Incorrect']);
         }
 
-        $user = $this->userRepository->find('email', $validated['email']);
+        $user = $this->userRepository->find('email', $resetToken->first()->email);
 
         DB::beginTransaction();
 
