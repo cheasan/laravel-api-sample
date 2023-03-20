@@ -3,7 +3,7 @@
 namespace App\Http\Responses;
 
 use Illuminate\Contracts\Support\Responsable;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\JsonResponse;
 
 class FailResponse implements Responsable
 {
@@ -26,6 +26,6 @@ class FailResponse implements Responsable
             'errors' => $this->errors,
         ];
 
-        return new Response(json_encode($formattedData), $this->status);
+        return new JsonResponse($formattedData, $this->status);
     }
 }

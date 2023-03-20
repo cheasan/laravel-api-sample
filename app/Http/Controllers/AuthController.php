@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\CreateUserRequest;
+use App\Http\Requests\Auth\ForgotPassword;
 use App\Http\Requests\Auth\LoginUserRequest;
 use App\Http\Responses\ErrorResponse;
 use App\Http\Responses\SuccessResponse;
+use App\Notifications\PasswordResetNotification;
 use App\Repositories\CustomerRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Auth\Events\Verified;
@@ -14,6 +16,8 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\URL;
 
 class AuthController extends Controller
@@ -32,7 +36,7 @@ class AuthController extends Controller
     {
 
         $validated = $request->validated();
-        $user = $this->userRepository->find('email', $request->email);
+        $user = $this->userRepository->find('email', $validated['email']);
 
         if (!$user) {
             return new ErrorResponse(
@@ -51,9 +55,8 @@ class AuthController extends Controller
         }
 
         return new SuccessResponse(
-            ['token' => $user->createToken("API TOKEN")->plainTextToken],
             'User login successfully',
-            200
+            ['token' => $user->createToken("API TOKEN")->plainTextToken]
         );
     }
 
@@ -88,8 +91,8 @@ class AuthController extends Controller
         }
 
         return new SuccessResponse(
-            ['token' => $user->createToken("API TOKEN")->plainTextToken],
             'User Created Successfully',
+            ['token' => $user->createToken("API TOKEN")->plainTextToken],
             201
         );
     }
@@ -98,10 +101,7 @@ class AuthController extends Controller
     {
         request()->user()->currentAccessToken()->delete();
 
-        return new SuccessResponse(
-            null,
-            'User logout successfully.'
-        );
+        return new SuccessResponse('User logout successfully.');
     }
 
     public function verify(HttpRequest $request)
@@ -119,9 +119,6 @@ class AuthController extends Controller
         $user->markEmailAsVerified();
         event(new Verified($user));
 
-        return new SuccessResponse(
-            null,
-            'Email verified successfully.'
-        );
+        return new SuccessResponse('Email verified successfully.');
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Http\Responses;
 
 use Illuminate\Contracts\Support\Responsable;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\JsonResponse;
 
 class SuccessResponse implements Responsable
 {
@@ -11,7 +11,7 @@ class SuccessResponse implements Responsable
     protected $message;
     protected $status;
 
-    public function __construct($data = null, $message = 'OK', $status = 200)
+    public function __construct($message = 'OK', $data = null, $status = 200)
     {
         $this->data = $data;
         $this->message = $message;
@@ -26,6 +26,6 @@ class SuccessResponse implements Responsable
             'data' => $this->data,
         ];
 
-        return new Response(json_encode($formattedData), $this->status);
+        return new JsonResponse($formattedData, $this->status);
     }
 }
